@@ -12,5 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod terminal;
+
+use ratatui::crossterm::event::{self, Event, KeyCode};
+
 fn main() {
+	let (_terminal_cleanup, _terminal) = terminal::init();
+	loop {
+		let event = event::read().expect("stdin event read failed");
+		println!("{:?}\r", event);
+		if let Event::Key(event) = event
+			&& event.code == KeyCode::Char('q')
+		{
+			break;
+		}
+	}
 }
