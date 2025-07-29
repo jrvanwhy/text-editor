@@ -26,11 +26,6 @@ license = "Apache-2.0"
 publish = false
 repository = "https://github.com/jrvanwhy/text-editor"
 
-[dependencies.crossterm]
-default-features = false
-features = ["bracketed-paste", "events"]
-version = "0.29.0"
-
 [dependencies.ratatui]
 default-features = false
 features = ["crossterm"]
