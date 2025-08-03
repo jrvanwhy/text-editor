@@ -28,6 +28,6 @@ repository = "https://github.com/jrvanwhy/text-editor"
 
 [dependencies.ratatui]
 default-features = false
-features = ["crossterm"]
+features = ["crossterm", "scrolling-regions"]
 # TODO: When updated beyond 0.29.0, check if "layout-cache" has been enabled.
 version = "0.29.0"
