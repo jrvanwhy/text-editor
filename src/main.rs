@@ -12,19 +12,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod command;
+mod input;
+mod prompt;
 mod terminal;
+mod ui;
 
-use ratatui::crossterm::event::{self, Event, KeyCode};
+use input::Event;
+use prompt::Prompt;
+use ratatui::layout::Position;
+
+#[derive(Default)]
+struct State {
+	cursor_position: Option<Position>,
+	exit: bool,
+	message: String,
+	mode: Mode,
+	prompt: Prompt,
+}
+
+#[derive(Clone, Copy, Default)]
+enum Mode {
+	#[default]
+	Command,
+	Prompt,
+}
 
 fn main() {
-	let (_terminal_cleanup, _terminal) = terminal::init();
-	loop {
-		let event = event::read().expect("stdin event read failed");
-		println!("{:?}\r", event);
-		if let Event::Key(event) = event
-			&& event.code == KeyCode::Char('q')
-		{
-			break;
+	let (_terminal_cleanup, mut terminal) = terminal::init();
+	let mut state = State::default();
+	while !state.exit {
+		let _ = terminal.draw(|frame| ui::render(frame, &mut state)).expect("terminal draw failed");
+		match state.cursor_position {
+			None => terminal.hide_cursor().unwrap(),
+			Some(position) => {
+				terminal.set_cursor_position(position).unwrap();
+				terminal.show_cursor().unwrap();
+			}
+		};
+		let event = input::next();
+		match (event, state.mode) {
+			(Event::Key(key_event), Mode::Command) => command::on_key(&mut state, key_event),
+			(Event::Paste(paste), Mode::Command) => command::on_paste(&mut state, paste),
+			(Event::Key(key_event), Mode::Prompt) => prompt::on_key(&mut state, key_event),
+			(Event::Paste(paste), Mode::Prompt) => prompt::on_paste(&mut state, paste),
+			(Event::Resize, _) => continue,
 		}
 	}
 }
