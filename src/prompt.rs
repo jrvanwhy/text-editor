@@ -54,7 +54,19 @@ pub fn start(state: &mut State) {
 
 fn execute_cmd(state: &mut State) {
 	match &*state.prompt {
-		"q" | "q!" => state.exit = true,
+		"q" | "q!" => {
+			state.tabs.remove(state.current_tab);
+			if state.current_tab >= state.tabs.len() && state.current_tab > 0 {
+				state.current_tab = state.tabs.len() - 1;
+			}
+		}
+		"tabn" => state.current_tab = (state.current_tab + 1) % state.tabs.len(),
+		"tabp" => {
+			state.current_tab = match state.current_tab.checked_sub(1) {
+				None => state.tabs.len() - 1,
+				Some(n) => n,
+			}
+		}
 		_ => {}
 	}
 	command::start(state);

@@ -15,33 +15,46 @@
 mod command;
 mod input;
 mod prompt;
+mod tab;
 mod terminal;
 mod ui;
 
 use input::Event;
 use prompt::Prompt;
 use ratatui::layout::Position;
+use std::env;
+use tab::Tab;
 
-#[derive(Default)]
 struct State {
 	cursor_position: Option<Position>,
-	exit: bool,
 	message: String,
 	mode: Mode,
 	prompt: Prompt,
+	tabs: Vec<Tab>,
+	current_tab: usize,
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy)]
 enum Mode {
-	#[default]
 	Command,
 	Prompt,
 }
 
 fn main() {
 	let (_terminal_cleanup, mut terminal) = terminal::init();
-	let mut state = State::default();
-	while !state.exit {
+	let cmdline_tabs: Vec<_> = env::args().skip(1).map(Tab::new_with_filename).collect();
+	let mut state = State {
+		cursor_position: None,
+		message: String::new(),
+		mode: Mode::Command,
+		prompt: Prompt::default(),
+		tabs: match cmdline_tabs.is_empty() {
+			false => cmdline_tabs,
+			true => vec![Tab::new_unnamed()],
+		},
+		current_tab: 0,
+	};
+	while !state.tabs.is_empty() {
 		let _ = terminal.draw(|frame| ui::render(frame, &mut state)).expect("terminal draw failed");
 		match state.cursor_position {
 			None => terminal.hide_cursor().unwrap(),

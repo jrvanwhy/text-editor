@@ -12,17 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{Mode, State};
+use crate::{Mode, State, Tab};
 use ratatui::Frame;
-use ratatui::{
-	layout::{Constraint, Layout},
-	text::Line,
-};
+use ratatui::layout::{Constraint, Layout};
+use ratatui::style::{Color, Modifier, Style};
+use ratatui::text::Line;
+use ratatui::widgets::Tabs;
 
 pub fn render(frame: &mut Frame, state: &mut State) {
-	let [_tabs, _textarea, statusline] =
+	let [tabs, _textarea, statusline] =
 		Layout::vertical([Constraint::Length(1), Constraint::Fill(1), Constraint::Length(1)])
 			.areas(frame.area());
+
+	frame.render_widget(
+		Tabs::new(state.tabs.iter().map(|t| format!(" {} ", t.title())))
+			.divider("")
+			.highlight_style(
+				Style::from((Color::White, Color::Black)).remove_modifier(Modifier::UNDERLINED),
+			)
+			.padding("", "")
+			.select(state.current_tab)
+			.style((Color::White, Color::Gray, Modifier::UNDERLINED)),
+		tabs,
+	);
+
 	let message = Line::from(&*state.message);
 	let message_width: u16 = message.width().try_into().unwrap();
 	frame.render_widget(message, statusline);
