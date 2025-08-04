@@ -26,6 +26,9 @@ license = "Apache-2.0"
 publish = false
 repository = "https://github.com/jrvanwhy/text-editor"
 
+[dependencies]
+ec4rs = "1.2.0"
+
 [dependencies.ratatui]
 default-features = false
 features = ["crossterm", "scrolling-regions"]

@@ -12,66 +12,67 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{Mode, State, command};
+use crate::{Mode, Model, command};
 use ratatui::crossterm::event::{KeyCode, KeyEvent};
 
 pub type Prompt = String;
 
-pub fn on_key(state: &mut State, key_event: KeyEvent) {
+pub fn on_key(model: &mut Model, key_event: KeyEvent) {
 	match key_event.code {
 		KeyCode::Backspace => {
-			if state.prompt.pop().is_none() {
-				state.message = String::new();
-				command::start(state);
+			if model.prompt.pop().is_none() {
+				model.message = String::new();
+				command::start(model);
 			} else {
-				update_message(state);
+				update_message(model);
 			}
 		}
-		KeyCode::Enter => execute_cmd(state),
+		KeyCode::Enter => execute_cmd(model),
 		KeyCode::Esc => {
-			state.message = String::new();
-			command::start(state);
+			model.message = String::new();
+			command::start(model);
 		}
 		KeyCode::Char(c) => {
-			state.prompt.push(c);
-			update_message(state);
+			model.prompt.push(c);
+			update_message(model);
 		}
 		_ => {}
 	}
 }
 
-pub fn on_paste(_state: &mut State, _paste: String) {}
+pub fn on_paste(_model: &mut Model, _paste: String) {}
 
-pub fn start(state: &mut State) {
-	state.mode = Mode::Prompt;
-	state.prompt = String::new();
-	update_message(state);
+pub fn start(model: &mut Model) {
+	model.mode = Mode::Prompt;
+	model.prompt = String::new();
+	update_message(model);
 }
 
 // -----------------------------------------------------------------------------
 // Implementation details below.
 // -----------------------------------------------------------------------------
 
-fn execute_cmd(state: &mut State) {
-	match &*state.prompt {
+fn execute_cmd(model: &mut Model) {
+	match &*model.prompt {
 		"q" | "q!" => {
-			state.tabs.remove(state.current_tab);
-			if state.current_tab >= state.tabs.len() && state.current_tab > 0 {
-				state.current_tab = state.tabs.len() - 1;
+			model.tabs.remove(model.current_tab);
+			if model.current_tab >= model.tabs.len() && model.current_tab > 0 {
+				model.current_tab = model.tabs.len() - 1;
 			}
 		}
-		"tabn" => state.current_tab = (state.current_tab + 1) % state.tabs.len(),
+		"qall" | "qall!" => model.tabs = vec![],
+		"tabn" => model.current_tab = (model.current_tab + 1) % model.tabs.len(),
 		"tabp" => {
-			state.current_tab = match state.current_tab.checked_sub(1) {
-				None => state.tabs.len() - 1,
+			model.current_tab = match model.current_tab.checked_sub(1) {
+				None => model.tabs.len() - 1,
 				Some(n) => n,
 			}
 		}
 		_ => {}
 	}
-	command::start(state);
+	command::start(model);
 }
 
-fn update_message(state: &mut State) {
-	state.message = format!(":{}", state.prompt);
+fn update_message(model: &mut Model) {
+	model.message = format!(":{}", model.prompt);
 }

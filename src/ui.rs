@@ -12,34 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{Mode, State, Tab};
+use crate::{Mode, Model};
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Line;
 use ratatui::widgets::Tabs;
 
-pub fn render(frame: &mut Frame, state: &mut State) {
-	let [tabs, _textarea, statusline] =
+pub fn render(frame: &mut Frame, model: &mut Model) {
+	let [tabs, textarea, statusline] =
 		Layout::vertical([Constraint::Length(1), Constraint::Fill(1), Constraint::Length(1)])
 			.areas(frame.area());
 
 	frame.render_widget(
-		Tabs::new(state.tabs.iter().map(|t| format!(" {} ", t.title())))
+		Tabs::new(model.tabs.iter().map(|t| format!(" {} ", t.title())))
 			.divider("")
 			.highlight_style(
 				Style::from((Color::White, Color::Black)).remove_modifier(Modifier::UNDERLINED),
 			)
 			.padding("", "")
-			.select(state.current_tab)
+			.select(model.current_tab)
 			.style((Color::White, Color::Gray, Modifier::UNDERLINED)),
 		tabs,
 	);
 
-	let message = Line::from(&*state.message);
+	model.tabs[model.current_tab].adjust_window(textarea.width.into(), textarea.height.into());
+
+	let message = Line::from(&*model.message);
 	let message_width: u16 = message.width().try_into().unwrap();
 	frame.render_widget(message, statusline);
-	state.cursor_position = match state.mode {
+	model.render_cursor_position = match model.mode {
 		Mode::Command => None,
 		Mode::Prompt => {
 			let mut pos = statusline.as_position();

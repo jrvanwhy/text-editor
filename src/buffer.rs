@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{Mode, Model, prompt};
-use ratatui::crossterm::event::{KeyCode, KeyEvent};
+use crate::Rope;
 
-pub fn on_key(model: &mut Model, key_event: KeyEvent) {
-	match key_event.code {
-		KeyCode::Char(':') => prompt::start(model),
-		_ => {}
-	}
+pub struct Buffer {
+	current_snapshot: usize,
+	history: Vec<Rope>,
 }
 
-pub fn on_paste(_model: &mut Model, _paste: String) {}
+impl Buffer {
+	pub fn new() -> Buffer {
+		Buffer { current_snapshot: 0, history: vec![Rope::new()] }
+	}
 
-pub fn start(model: &mut Model) {
-	model.mode = Mode::Command;
+	pub fn line_number_column_width(&self) -> usize {
+		self.history[self.current_snapshot].lines().ilog10() as usize + 1
+	}
 }
