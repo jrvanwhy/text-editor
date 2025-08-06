@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{Mode, Model, prompt};
-use ratatui::crossterm::event::{KeyCode, KeyEvent};
+use std::rc::Rc;
 
-pub fn on_key(model: &mut Model, key_event: KeyEvent) {
-	match key_event.code {
-		KeyCode::Char(':') => prompt::start(model),
-		_ => {}
-	}
+// TODO: This is not a rope yet.
+#[derive(Clone)]
+pub struct Rope {
+	lines: Vec<Rc<String>>,
 }
 
-pub fn on_paste(_model: &mut Model, _paste: String) {}
+impl Rope {
+	pub fn new() -> Rope {
+		Rope { lines: vec![Rc::new("".into())] }
+	}
 
-pub fn start(model: &mut Model) {
-	model.mode = Mode::Command;
+	pub fn lines(&self) -> usize {
+		self.lines.len()
+	}
 }
