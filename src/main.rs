@@ -15,6 +15,7 @@
 mod buffer;
 mod command;
 mod input;
+mod line;
 mod model;
 mod prompt;
 mod rope;
@@ -24,6 +25,7 @@ mod ui;
 
 use buffer::Buffer;
 use input::Event;
+use line::Line;
 use model::{Mode, Model};
 use prompt::Prompt;
 use rope::Rope;

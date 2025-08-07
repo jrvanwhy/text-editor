@@ -16,7 +16,7 @@ use crate::{Mode, Model};
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout};
 use ratatui::style::{Color, Modifier, Style};
-use ratatui::text::Line;
+use ratatui::text::{Line, Span, Text};
 use ratatui::widgets::Tabs;
 
 pub fn render(frame: &mut Frame, model: &mut Model) {
@@ -36,7 +36,30 @@ pub fn render(frame: &mut Frame, model: &mut Model) {
 		tabs,
 	);
 
-	model.tabs[model.current_tab].adjust_window(textarea.width.into(), textarea.height.into());
+	let tab = &mut model.tabs[model.current_tab];
+	tab.adjust_window(textarea.width.into(), textarea.height.into());
+	let (start_line, start_column) = tab.window_location();
+	let number_col_width = tab.buffer().line_number_column_width();
+	let current_snapshot = tab.buffer().current_snapshot();
+	let mut render_text = Text::default();
+	for i in start_line..(start_line + textarea.height as usize) {
+		if i >= current_snapshot.num_lines() {
+			render_text.push_line(Line::styled("~", Color::Blue));
+			continue;
+		}
+		let mut line = Line::default();
+		line.push_span(Span::styled(format!(" {:number_col_width$} ", i + 1), Color::Gray));
+		let indentation_bytes = current_snapshot.line(i).indentation_bytes();
+		line.push_span(Span::styled(
+			current_snapshot.line(i).contents()[..indentation_bytes].replace('\t', "    "),
+			(Color::White, Color::DarkGray),
+		));
+		line.push_span(Span::raw(
+			current_snapshot.line(i).contents()[indentation_bytes..].replace('\t', "    "),
+		));
+		render_text.push_line(line);
+	}
+	frame.render_widget(render_text, textarea);
 
 	let message = Line::from(&*model.message);
 	let message_width: u16 = message.width().try_into().unwrap();

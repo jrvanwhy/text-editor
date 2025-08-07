@@ -12,20 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
+use crate::Line;
+use std::fs::File;
+use std::io::{BufRead as _, BufReader};
 
 // TODO: This is not a rope yet.
 #[derive(Clone)]
 pub struct Rope {
-	lines: Vec<Rc<String>>,
+	lines: Vec<Line>,
 }
 
 impl Rope {
-	pub fn new() -> Rope {
-		Rope { lines: vec![Rc::new("".into())] }
+	pub fn new(filename: Option<&str>) -> Rope {
+		Rope {
+			lines: (|| {
+				Some(
+					BufReader::new(File::open(filename?).ok()?)
+						.lines()
+						.map(|l| Line::new(l.unwrap()))
+						.collect::<Vec<_>>(),
+				)
+			})()
+			.unwrap_or_else(|| vec![Line::new("".into())]),
+		}
 	}
 
-	pub fn lines(&self) -> usize {
+	pub fn line(&self, idx: usize) -> &Line {
+		&self.lines[idx]
+	}
+
+	pub fn num_lines(&self) -> usize {
 		self.lines.len()
 	}
 }

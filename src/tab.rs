@@ -36,9 +36,13 @@ impl Tab {
 		);
 	}
 
+	pub fn buffer(&self) -> &Buffer {
+		&self.buffer
+	}
+
 	pub fn new(name: Option<String>) -> Tab {
 		Tab {
-			buffer: Buffer::new().into(),
+			buffer: Buffer::new(name.as_deref()).into(),
 			cursor_column: 0,
 			cursor_line: 0,
 			title: name.unwrap_or_else(|| "[No Name]".into()),
@@ -49,6 +53,10 @@ impl Tab {
 
 	pub fn title(&self) -> &str {
 		&self.title
+	}
+
+	pub fn window_location(&self) -> (usize, usize) {
+		(self.window_line, self.window_column)
 	}
 }
 

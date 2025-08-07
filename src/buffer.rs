@@ -20,11 +20,15 @@ pub struct Buffer {
 }
 
 impl Buffer {
-	pub fn new() -> Buffer {
-		Buffer { current_snapshot: 0, history: vec![Rope::new()] }
+	pub fn new(name: Option<&str>) -> Buffer {
+		Buffer { current_snapshot: 0, history: vec![Rope::new(name)] }
+	}
+
+	pub fn current_snapshot(&self) -> &Rope {
+		&self.history[self.current_snapshot]
 	}
 
 	pub fn line_number_column_width(&self) -> usize {
-		self.history[self.current_snapshot].lines().ilog10() as usize + 1
+		self.history[self.current_snapshot].num_lines().ilog10() as usize + 3
 	}
 }
