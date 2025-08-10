@@ -12,20 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
+use std::num::NonZeroUsize;
 
-// TODO: This is not a rope yet.
-#[derive(Clone)]
-pub struct Rope {
-	lines: Vec<Rc<String>>,
-}
+/// Line index: starts at 0. The maximum line index for a file is the number of
+/// lines minus one.
+pub struct LineIndex(pub usize);
 
-impl Rope {
-	pub fn new() -> Rope {
-		Rope { lines: vec![Rc::new("".into())] }
-	}
-
-	pub fn lines(&self) -> usize {
-		self.lines.len()
-	}
-}
+/// Line number: starts at 1. Used for user display
+pub struct LineNumber(pub NonZeroUsize);

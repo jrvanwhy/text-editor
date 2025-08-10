@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use crate::Buffer;
+use std::path::PathBuf;
 use std::rc::Rc;
 
 pub struct Tab {
@@ -36,12 +37,15 @@ impl Tab {
 		);
 	}
 
-	pub fn new(name: Option<String>) -> Tab {
+	pub fn new(name: Option<PathBuf>) -> Tab {
 		Tab {
-			buffer: Buffer::new().into(),
 			cursor_column: 0,
 			cursor_line: 0,
-			title: name.unwrap_or_else(|| "[No Name]".into()),
+			title: match &name {
+				None => "[No Name]".into(),
+				Some(name) => name.display().to_string(),
+			},
+			buffer: Buffer::new(name).into(),
 			window_column: 0,
 			window_line: 0,
 		}

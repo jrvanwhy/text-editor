@@ -14,19 +14,22 @@
 
 mod buffer;
 mod command;
+mod file_snapshot;
 mod input;
 mod model;
+mod language;
+mod position;
 mod prompt;
-mod rope;
 mod tab;
 mod terminal;
 mod ui;
 
 use buffer::Buffer;
+use file_snapshot::FileSnapshot;
 use input::Event;
+use language::Language;
 use model::{Mode, Model};
 use prompt::Prompt;
-use rope::Rope;
 use std::env;
 use tab::Tab;
 
@@ -36,7 +39,7 @@ fn main() {
 	// TODO: Once multiple tab support is safe (buffers are appropriately
 	// deduplicated), change this to initialize one tab for every command line
 	// argument.
-	model.new_tab(env::args().skip(1).next());
+	model.new_tab(env::args_os().skip(1).next().map(From::from));
 	while !model.tabs.is_empty() {
 		let _ = terminal.draw(|frame| ui::render(frame, &mut model)).expect("terminal draw failed");
 		match model.render_cursor_position {

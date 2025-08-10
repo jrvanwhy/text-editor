@@ -12,19 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::Rope;
+use crate::{FileSnapshot, Language};
+use std::collections::BTreeMap;
+use std::path::PathBuf;
+use tree_sitter::Parser;
 
 pub struct Buffer {
+	// The version of the file currently being edited (indexes into `history`).
 	current_snapshot: usize,
-	history: Vec<Rope>,
+	// This is basically a Vec<FileSnapshot>, but with O(log(n)) insertion time
+	// (rather than amortized O(1)). The keys are incrementing number starting
+	// at 0 (i.e. they would match the indexes into a Vec).
+	history: BTreeMap<usize, FileSnapshot>,
+	language: Option<Language>,
+	parser: Option<&'static Parser>,
 }
 
 impl Buffer {
-	pub fn new() -> Buffer {
-		Buffer { current_snapshot: 0, history: vec![Rope::new()] }
+	pub fn new(path: Option<PathBuf>) -> Buffer {
+		let language = path.as_deref().and_then(Language::for_path);
+		let parser = language.map(Language::parser);
+		Buffer { current_snapshot: 0, history: [(0, FileSnapshot::new(path.as_deref(), parser, language))].into(), language, parser }
+	}
+
+	pub fn current_snapshot(&self) -> &FileSnapshot {
+		&self.history[&self.current_snapshot]
 	}
 
 	pub fn line_number_column_width(&self) -> usize {
-		self.history[self.current_snapshot].lines().ilog10() as usize + 1
+		todo!()
+		//self.history[self.current_snapshot].lines().ilog10() as usize + 1
 	}
 }

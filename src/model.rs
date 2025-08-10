@@ -16,6 +16,7 @@
 //! is the data structure storing the main state of the editor.
 
 use crate::{Prompt, Tab};
+use std::path::PathBuf;
 use ratatui::layout::Position;
 
 pub struct Model {
@@ -41,7 +42,7 @@ impl Model {
 		}
 	}
 
-	pub fn new_tab(&mut self, name: Option<String>) {
+	pub fn new_tab(&mut self, name: Option<PathBuf>) {
 		// TODO: Deduplicate buffers if the same file is opened multiple times.
 		if !self.tabs.is_empty() {
 			self.current_tab += 1;
