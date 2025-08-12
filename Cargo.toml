@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [package]
-name = "text-editor"
+name = "te"
 authors = ["Ryan Van Why <jrvanwhy@gmail.com>"]
 categories = ["command-line-utilities", "development-tools", "text-editors"]
 description = """My personal text editor. Supports editing space-indented \
@@ -25,6 +25,10 @@ license = "Apache-2.0"
 # include my username).
 publish = false
 repository = "https://github.com/jrvanwhy/text-editor"
+
+[[bin]]
+name = "reindent"
+path = "reindent/main.rs"
 
 [dependencies]
 ec4rs = "1.2.0"
